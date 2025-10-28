@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cadastro — CPF, Nome e Senha</title>
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --accent:#6ee7b7;
+      --muted:#9aa4b2;
+      --danger:#ff6b6b;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.04);
+      --radius:14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: linear-gradient(180deg,#071026 0%, #052032 100%);
+      color: #e6eef6;
+      display:grid;
+      place-items:center;
+      padding:32px;
+    }
+
+    .card{
+      width:100%;
+      max-width:520px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:28px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.7), inset 0 1px 0 rgba(255,255,255,0.02);
+      backdrop-filter: blur(6px) saturate(120%);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:20px;
+      letter-spacing: -0.2px;
+    }
+    p.lead{
+      margin:0 0 20px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    form .row{
+      display:grid;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    label{
+      font-size:13px;
+      color:var(--muted);
+      display:block;
+      margin-bottom:6px;
+    }
+
+    .input{
+      position:relative;
+    }
+
+    input[type="text"],
+    input[type="password"]{
+      width:100%;
+      padding:12px 44px 12px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.04);
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      color: #eaf5f0;
+      outline:none;
+      font-size:14px;
+      transition: box-shadow .15s, border-color .15s, transform .06s;
+    }
+    input:focus{
+      box-shadow: 0 6px 24px rgba(14,165,233,0.06);
+      border-color: rgba(110,231,183,0.3);
+      transform: translateY(-1px);
+    }
+
+    .icon{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      width:36px;
+      height:36px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:15px;
+      border-radius:8px;
+      background:transparent;
+      cursor:pointer;
+    }
+
+    .small{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
+    .btn{
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:0;
+      background: linear-gradient(90deg,var(--accent), #34d399);
+      color:#022;
+      font-weight:600;
+      cursor:pointer;
+      font-size:15px;
+      box-shadow: 0 8px 20px rgba(16,185,129,0.12);
+    }
+    .btn:active{transform:translateY(1px)}
+
+    .row.inline{
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+
+    .helper{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+
+    .error{
+      color:var(--danger);
+      font-size:13px;
+      margin-top:8px;
+    }
+
+    .ok{
+      color: #7ee7c7;
+      font-size:13px;
+      margin-top:8px;
+    }
+
+    .strength {
+      height:8px;
+      border-radius:8px;
+      background:var(--glass-2);
+      overflow:hidden;
+      margin-top:8px;
+    }
+    .strength > i{
+      display:block;
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#ff6b6b,#ffd166,#6ee7b7);
+      transition: width .25s ease;
+    }
+
+    footer.note{
+      margin-top:14px;
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    /* responsive */
+    @media (max-width:420px){
+      .card{padding:18px}
+    }
+
+    /* subtle field status */
+    .invalid input{ border-color: rgba(255,107,107,0.35); box-shadow: 0 6px 20px rgba(255,107,107,0.04); }
+    .valid input{ border-color: rgba(110,231,183,0.28); box-shadow: 0 6px 20px rgba(110,231,183,0.04); }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="title">
+    <h1 id="title">Criar conta</h1>
+    <p class="lead">Preencha seus dados para criar sua conta com segurança.</p>
+
+    <form id="form" novalidate>
+      <div class="row">
+        <div class="input" id="cpf-wrap">
+          <label for="cpf">CPF</label>
+          <input id="cpf" name="cpf" type="text" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00" aria-describedby="cpfHelp" required>
+          <button type="button" class="icon" id="cpf-clear" title="Limpar CPF" aria-label="Limpar CPF" style="right:44px;display:none">✕</button>
+          <div id="cpfHelp" class="small">Somente números — será validado.</div>
+          <div id="cpfError" class="error" aria-live="polite" style="display:none"></div>
+        </div>
+
+        <div class="input">
+          <label for="nome">Nome completo</label>
+          <input id="nome" name="nome" type="text" autocomplete="name" placeholder="Seu nome completo" minlength="2" required>
+          <div id="nomeError" class="error" aria-live="polite" style="display:none"></div>
+        </div>
+
+        <div class="input" style="margin-top:6px" id="pwd-wrap">
+          <label for="senha">Senha</label>
+          <input id="senha" name="senha" type="password" autocomplete="new-password" placeholder="Crie uma senha segura" minlength="8" required>
+          <button type="button" class="icon" id="togglePwd" title="Mostrar senha" aria-label="Mostrar senha">👁️</button>
+          <div id="pwdRules" class="small">Mínimo 8 caracteres, maiúscula, minúscula, número e símbolo.</div>
+          <div class="strength" aria-hidden="true"><i id="strengthBar"></i></div>
+          <div id="pwdError" class="error" aria-live="polite" style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="helper">
+        <div style="font-size:13px;color:var(--muted)">Já tem conta? <a href="#" style="color:var(--accent);text-decoration:none">Entrar</a></div>
+        <button class="btn" id="submitBtn" type="submit">Criar Conta</button>
+      </div>
+
+      <div id="formMsg" role="status" aria-live="polite" style="margin-top:12px"></div>
+    </form>
+
+    <footer class="note">Seus dados ficam protegidos localmente. Este é um exemplo — adapte para backend seguro.</footer>
+  </main>
+
+  <script>
+    // --- Helpers: máscara de CPF e validação de CPF ---
+    const cpfInput = document.getElementById('cpf');
+    const cpfClear = document.getElementById('cpf-clear');
+    const cpfError = document.getElementById('cpfError');
+    const cpfWrap = document.getElementById('cpf-wrap');
+
+    function onlyDigits(str){ return (str || '').replace(/\D+/g,''); }
+
+    function formatCPF(value){
+      const v = onlyDigits(value).slice(0,11);
+      let out = v;
+      if(v.length > 9) out = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+      else if(v.length > 6) out = v.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+      else if(v.length > 3) out = v.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+      return out;
+    }
+
+    function validateCPF(raw){
+      const s = onlyDigits(raw);
+      if(s.length !== 11) return {ok:false, reason:'CPF deve ter 11 dígitos.'};
+      // bloqueia sequências repetidas
+      if(/^(\d)\1{10}$/.test(s)) return {ok:false, reason:'CPF inválido.'};
+
+      const nums = s.split('').map(n=>+n);
+      // calcular primeiro dígito verificador
+      const calcDV = (arr, pos) => {
+        let sum = 0;
+        for(let i=0;i<pos;i++){
+          sum += arr[i] * (pos+1 - i);
+        }
+        let r = (sum * 10) % 11;
+        return (r === 10) ? 0 : r;
+      };
+
+      const dv1 = calcDV(nums,9);
+      const dv2 = calcDV(nums.concat(dv1),10);
+      if(dv1 === nums[9] && dv2 === nums[10]) return {ok:true};
+      return {ok:false, reason:'CPF inválido (dígitos verificadores não conferem).'};
+    }
+
+    cpfInput.addEventListener('input', (e)=>{
+      const pos = cpfInput.selectionStart;
+      const rawBefore = cpfInput.value;
+      cpfInput.value = formatCPF(rawBefore);
+      cpfClear.style.display = cpfInput.value ? 'block' : 'none';
+      // limpa mensagens
+      cpfError.style.display = 'none';
+      cpfWrap.classList.remove('invalid','valid');
+    });
+
+    cpfInput.addEventListener('blur', ()=>{
+      const res = validateCPF(cpfInput.value);
+      if(!res.ok){
+        cpfError.textContent = res.reason;
+        cpfError.style.display = 'block';
+        cpfWrap.classList.add('invalid');
+      } else {
+        cpfError.style.display = 'none';
+        cpfWrap.classList.add('valid');
+      }
+    });
+
+    cpfClear.addEventListener('click', ()=>{
+      cpfInput.value = '';
+      cpfInput.focus();
+      cpfClear.style.display = 'none';
+      cpfError.style.display = 'none';
+      cpfWrap.classList.remove('invalid','valid');
+    });
+
+    // --- Nome ---
+    const nomeInput = document.getElementById('nome');
+    const nomeError = document.getElementById('nomeError');
+
+    nomeInput.addEventListener('blur', ()=>{
+      const v = (nomeInput.value || '').trim();
+      if(v.length < 2){
+        nomeError.textContent = 'Informe seu nome completo.';
+        nomeError.style.display = 'block';
+        nomeInput.parentElement.classList.add('invalid');
+      } else {
+        nomeError.style.display = 'none';
+        nomeInput.parentElement.classList.remove('invalid');
+        nomeInput.parentElement.classList.add('valid');
+      }
+    });
+
+    // --- Senha e força ---
+    const pwdInput = document.getElementById('senha');
+    const togglePwd = document.getElementById('togglePwd');
+    const pwdError = document.getElementById('pwdError');
+    const strengthBar = document.getElementById('strengthBar');
+    const pwdWrap = document.getElementById('pwd-wrap');
+
+    togglePwd.addEventListener('click', ()=>{
+      const t = pwdInput.type === 'password' ? 'text' : 'password';
+      pwdInput.type = t;
+      togglePwd.textContent = t === 'password' ? '👁️' : '🙈';
+      togglePwd.title = t === 'password' ? 'Mostrar senha' : 'Esconder senha';
+    });
+
+    function evaluatePassword(pwd){
+      // Pontuação básica
+      let score = 0;
+      if(pwd.length >= 8) score += 1;
+      if(/[A-Z]/.test(pwd)) score += 1;
+      if(/[a-z]/.test(pwd)) score += 1;
+      if(/\d/.test(pwd)) score += 1;
+      if(/[^A-Za-z0-9]/.test(pwd)) score += 1;
+      return score; // 0..5
+    }
+
+    pwdInput.addEventListener('input', ()=>{
+      const p = pwdInput.value || '';
+      const s = evaluatePassword(p);
+      const pct = Math.min(100, Math.round((s/5)*100));
+      strengthBar.style.width = pct + '%';
+      // cor via largura
+      if(pct < 40){
+        strengthBar.style.background = 'linear-gradient(90deg,#ff6b6b,#ff9f9f)';
+      } else if(pct < 70){
+        strengthBar.style.background = 'linear-gradient(90deg,#ffd166,#ffd899)';
+      } else {
+        strengthBar.style.background = 'linear-gradient(90deg,#6ee7b7,#34d399)';
+      }
+      // mensagens dinâmicas
+      if(p.length === 0){
+        pwdError.style.display = 'none';
+        pwdWrap.classList.remove('invalid','valid');
+      } else if(p.length < 8 || s < 4){
+        pwdError.textContent = 'Senha fraca — tente incluir maiúscula, número e símbolo.';
+        pwdError.style.display = 'block';
+        pwdWrap.classList.add('invalid');
+        pwdWrap.classList.remove('valid');
+      } else {
+        pwdError.style.display = 'none';
+        pwdWrap.classList.remove('invalid');
+        pwdWrap.classList.add('valid');
+      }
+    });
+
+    // --- Submit handling (apenas front-end demo) ---
+    const form = document.getElementById('form');
+    const formMsg = document.getElementById('formMsg');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', (ev)=>{
+      ev.preventDefault();
+      formMsg.textContent = '';
+      formMsg.className = '';
+
+      // validações finais
+      const cpfVal = cpfInput.value;
+      const nomeVal = (nomeInput.value || '').trim();
+      const pwdVal = pwdInput.value || '';
+
+      const cpfRes = validateCPF(cpfVal);
+      let ok = true;
+
+      if(!cpfRes.ok){
+        cpfError.textContent = cpfRes.reason;
+        cpfError.style.display = 'block';
+        cpfWrap.classList.add('invalid');
+        ok = false;
+      }
+
+      if(nomeVal.length < 2){
+        nomeError.textContent = 'Nome inválido.';
+        nomeError.style.display = 'block';
+        nomeInput.parentElement.classList.add('invalid');
+        ok = false;
+      }
+
+      if(evaluatePassword(pwdVal) < 4 || pwdVal.length < 8){
+        pwdError.textContent = 'Senha não atende aos requisitos.';
+        pwdError.style.display = 'block';
+        pwdWrap.classList.add('invalid');
+        ok = false;
+      }
+
+      if(!ok){
+        formMsg.textContent = 'Corrija os campos marcados para prosseguir.';
+        formMsg.classList.add('error');
+        formMsg.style.color = 'var(--danger)';
+        return;
+      }
+
+      // Simula envio — aqui você chamaria seu backend via fetch POST seguro (HTTPS)
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processando...';
+
+      // Demo: mostra dados (mas não a senha) e limpa
+      setTimeout(()=>{
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Criar Conta';
+        formMsg.style.color = 'var(--accent)';
+        formMsg.textContent = `Conta criada com sucesso para ${nomeVal}! (CPF: ${cpfVal})`;
+        // opção: limpar campos
+        // form.reset();
+        // strengthBar.style.width = '0%';
+      }, 700);
+    });
+
+    // acessibilidade: permitir Enter em botão de limpar
+    cpfClear.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cpfClear.click(); }
+    });
+
+    // Prevenção: colar formatos estranhos no CPF -> formata
+    cpfInput.addEventListener('paste', (e)=>{
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text');
+      cpfInput.value = formatCPF(text);
+      cpfInput.dispatchEvent(new Event('input'));
+    });
+
+  </script>
+</body>
+</html>
